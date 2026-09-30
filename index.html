@@ -681,6 +681,135 @@ background:linear-gradient(170deg,#bfe6ff 0%,#8fd0ff 42%,#a6d8ff 72%,#cfe9ff 100
 </div>
 </div></div>
 
+<!-- ===== V8 Beta 大框架：旅行地图 / 旅行基础 / 升级锁定页（加法，不改动旧页面） ===== -->
+<style id="v8beta-style">
+:root{
+ --v-primary:#1971c2;--v-primary-soft:#e7f1fb;--v-secondary:#15aabf;
+ --v-success:#2f9e44;--v-success-soft:#ebfbee;--v-warning:#f08c00;--v-warning-soft:#fff4e6;
+ --v-danger:#e03131;--v-locked:#adb5bd;--v-lock-soft:#f1f3f5;
+ --v-ink:#1f3a52;--v-ink-2:#5a7184;--v-border:#e3edf6;--v-shadow:0 6px 18px rgba(31,58,82,.06);}
+#mapPage,#basePage,#lockPage{display:none}
+#mapPage.active,#basePage.active,#lockPage.active{display:block}
+.v8-head{padding:6px 2px 2px;text-align:center}
+.v8-back{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--v-border);background:#fff;color:var(--v-ink-2);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;min-height:38px}
+.v8-to-map{display:flex;justify-content:flex-start;padding:8px 2px 2px}
+.v8-title{font-size:23px;color:var(--v-ink);margin:12px 0 4px;line-height:1.3}
+.v8-sub{font-size:13.5px;color:var(--v-ink-2);margin:0 0 14px}
+/* 旅行路线 */
+.v8-route{position:relative}
+.v8-route::before{content:'';position:absolute;left:33px;top:24px;bottom:24px;width:2px;background:var(--v-border)}
+.vr-node{display:grid;grid-template-columns:44px 1fr 24px;align-items:center;gap:10px;width:100%;text-align:left;background:#fff;border:1px solid var(--v-border);border-radius:16px;padding:12px 14px;margin:0 0 10px;box-shadow:var(--v-shadow);min-height:60px}
+.vr-emoji{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--v-lock-soft);z-index:1}
+.vr-node.open .vr-emoji{background:var(--v-success-soft)}
+.vr-node.open{border-color:#b7d4ec}
+.vr-body{min-width:0}
+.vr-name{font-size:16px;font-weight:700;color:var(--v-ink);display:block}
+.vr-desc{font-size:12.5px;color:var(--v-ink-2);margin-top:2px;display:block;line-height:1.4}
+.vr-state{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:6px;white-space:nowrap}
+.vr-state.open{background:var(--v-success-soft);color:var(--v-success)}
+.vr-state.cur{background:var(--v-primary-soft);color:var(--v-primary)}
+.vr-state.done{background:var(--v-warning-soft);color:var(--v-warning)}
+.vr-state.lock{background:var(--v-lock-soft);color:var(--v-ink-2)}
+.vr-arrow{font-size:18px;color:var(--v-locked);text-align:center}
+.vr-bar{height:6px;border-radius:6px;background:var(--v-lock-soft);overflow:hidden;margin-top:7px;display:block}
+.vr-bar span{display:block;height:100%;background:var(--v-success);border-radius:6px}
+.vr-pct{font-size:11px;color:var(--v-ink-2);margin-top:4px;display:block}
+/* 五步思维导图 */
+.v8-mindmap{background:#fff;border:1px solid var(--v-border);border-radius:18px;padding:14px 16px;box-shadow:var(--v-shadow);margin-bottom:14px}
+.mm-step{display:grid;grid-template-columns:38px 70px 1fr;align-items:center;gap:10px}
+.mm-mark{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;background:var(--v-lock-soft);color:var(--v-ink-2)}
+.mm-name{font-size:15px;font-weight:700;color:var(--v-ink)}
+.mm-hint{font-size:12px;color:var(--v-ink-2)}
+.mm-step.done .mm-mark{background:var(--v-success);color:#fff}
+.mm-step.done .mm-name{color:var(--v-success)}
+.mm-step.cur .mm-mark{background:var(--v-primary);color:#fff;box-shadow:0 0 0 4px var(--v-primary-soft)}
+.mm-line{height:14px;width:2px;background:var(--v-border);margin-left:16px}
+.mm-line.on{background:var(--v-success)}
+/* 六模块 */
+.v8-base-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.bm-card{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#fff;border:1px solid var(--v-border);border-radius:16px;padding:13px 14px;box-shadow:var(--v-shadow);min-height:58px}
+.bm-num{width:26px;height:26px;border-radius:8px;background:var(--v-primary-soft);color:var(--v-primary);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.bm-emoji{font-size:20px}
+.bm-body{flex:1;min-width:0}
+.bm-name{font-size:15px;font-weight:700;color:var(--v-ink);display:block}
+.bm-desc{font-size:12.5px;color:var(--v-ink-2);margin-top:2px;display:block}
+.bm-go{color:var(--v-primary);font-size:18px}
+@media(min-width:560px){.v8-base-grid{grid-template-columns:1fr 1fr}}
+/* 通用按钮 */
+.v8-actions{display:flex;gap:10px;margin:16px 0 6px}
+.v8-btn{flex:1;border:none;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:700;min-height:50px}
+.v8-btn.primary{background:linear-gradient(135deg,#339af0,#1971c2);color:#fff;box-shadow:0 8px 20px rgba(25,113,194,.28)}
+.v8-btn.ghost{background:#fff;border:1px solid var(--v-border);color:var(--v-ink-2)}
+.v8-btn:active{transform:translateY(1px)}
+/* 锁定页 */
+.v8-lock{background:#fff;border:1px solid var(--v-border);border-radius:22px;padding:24px 20px calc(20px + env(safe-area-inset-bottom));box-shadow:var(--v-shadow);text-align:center;max-width:460px;margin:8px auto}
+.v8-lock-egg{font-size:46px}
+.v8-lock-tools{font-size:26px;margin:6px 0 2px;color:var(--v-secondary)}
+.v8-lock-title{font-size:21px;color:var(--v-ink);line-height:1.4;margin:8px 0 16px}
+.v8-lock-list{display:grid;gap:8px;text-align:left;margin:0 auto 14px;max-width:340px}
+.v8-lock-row{display:flex;justify-content:space-between;align-items:center;background:var(--v-lock-soft);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;color:var(--v-ink)}
+.v8-lock-row.ok{background:var(--v-success-soft)}
+.v8-lock-row.ok span:last-child{color:var(--v-success)}
+.v8-lock-row.wip span:last-child{color:var(--v-warning)}
+.v8-lock-note{font-size:13px;color:var(--v-ink-2);margin:0 0 14px}
+/* 基础模块展开层 */
+.v8-lesson-wrap{margin-top:16px;background:#fff;border:1px solid var(--v-border);border-radius:18px;overflow:hidden;box-shadow:var(--v-shadow)}
+.v8-lesson-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--v-border)}
+.v8-lesson-head h3{margin:0;font-size:16px;color:var(--v-ink)}
+.v8-lesson-list{display:grid;padding:8px;gap:8px}
+.v8-lesson-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#fff;border:1px solid var(--v-border);border-radius:14px;padding:11px 12px}
+.v8-li-num{width:28px;height:28px;border-radius:9px;background:var(--v-primary-soft);color:var(--v-primary);font-weight:800;display:flex;align-items:center;justify-content:center}
+.v8-li-main{flex:1;min-width:0}
+.v8-li-name{font-size:14.5px;font-weight:700;color:var(--v-ink);display:block}
+.v8-li-meta{font-size:12px;color:var(--v-ink-2);display:flex;gap:8px;align-items:center;margin-top:2px}
+.v8-li-go{color:var(--v-locked)}
+.v8-lesson-item.done .v8-li-num{background:var(--v-success-soft)}
+</style>
+
+<div class="page" id="mapPage"><div class="container">
+<div class="v8-head">
+<button class="v8-back" onclick="v8OpenFull()">🧩 完整学习中心</button>
+<h1 class="v8-title">🗺️ 我的西语旅行地图</h1>
+<p class="v8-sub">跟着阿蛋一站一站，把旅行西语玩着学会</p>
+</div>
+<div class="v8-route" id="v8Route"></div>
+<div class="v8-actions">
+<button class="v8-btn primary" onclick="openBase()">🌱 开始旅行基础</button>
+</div>
+</div></div>
+
+<div class="page" id="basePage"><div class="container">
+<div class="v8-head">
+<button class="v8-back" onclick="goHome()">← 返回地图</button>
+<h1 class="v8-title">🌱 旅行基础</h1>
+<p class="v8-sub">先打地基：认词 · 听懂 · 理解 · 会说 · 会用</p>
+</div>
+<div class="v8-mindmap" id="v8Mindmap"></div>
+<div class="v8-base-grid" id="v8BaseGrid"></div>
+<div class="v8-actions">
+<button class="v8-btn primary" onclick="startBaseChallenge()">🎮 旅行基础闯关</button>
+</div>
+<div id="v8BaseLessons"></div>
+</div></div>
+
+<div class="page" id="lockPage"><div class="container">
+<div class="v8-lock">
+<div class="v8-lock-egg">🥚</div>
+<div class="v8-lock-tools">🔧 <span>✈️</span></div>
+<h2 class="v8-lock-title" id="v8LockTitle">这条旅行路线<br>正在升级中</h2>
+<div class="v8-lock-list">
+<div class="v8-lock-row ok"><span>📚 知识体系</span><span>✓</span></div>
+<div class="v8-lock-row ok"><span>🧠 学习路线</span><span>✓</span></div>
+<div class="v8-lock-row wip"><span>🎧 听力训练</span><span>🔧</span></div>
+<div class="v8-lock-row wip"><span>🗣️ 口语训练</span><span>🔧</span></div>
+<div class="v8-lock-row wip"><span>🎮 闯关设计</span><span>🔧</span></div>
+</div>
+<p class="v8-lock-note">完成测试后开放</p>
+<button class="v8-btn primary" style="width:100%" onclick="openBase()">⭐ 去旅行基础</button>
+<button class="v8-btn ghost" style="width:100%;margin-top:8px" onclick="goHome()">← 返回地图</button>
+</div>
+</div></div>
+
 </div>
 <script>
 /* 全局安全网：任何意外错误都不白屏，给可恢复提示 */
@@ -2950,6 +3079,131 @@ window.addEventListener("offline",()=>fb("已断网：系统西语语音仍可�
 window.addEventListener("pagehide",cancelAllAudio);
 })();
 
+</script>
+<script id="v8beta-script">
+/* ===== V8 Beta 大框架行为层（只读式接入现有数据，不替换旧题库/不改动 storage key） ===== */
+(function(){
+ const BASE_IDS=[130,131,132,133,134,135,136,137];
+ const ROUTE=[
+  {emoji:'🌱',name:'旅行基础',desc:'入门识别 · 基础词汇 · 句型 · 听力 · 口语 · 任务',open:true},
+  {emoji:'✈️',name:'机场',desc:'值机 · 安检 · 转机',open:false},
+  {emoji:'🏨',name:'酒店',desc:'入住 · 设施 · 投诉',open:false},
+  {emoji:'🍽️',name:'餐厅',desc:'点餐 · 忌口 · 结账',open:false},
+  {emoji:'🚆',name:'交通',desc:'火车 · 地铁 · 出租 · 问路',open:false},
+  {emoji:'🛍️',name:'购物',desc:'市场 · 砍价 · 退税',open:false},
+  {emoji:'🆘',name:'紧急情况',desc:'就医 · 报警 · 求助',open:false},
+  {emoji:'🔒',name:'后续高级旅行任务',desc:'深度叙事 · 文化 · 考试',open:false}
+ ];
+ const MODULES=[
+  {id:'recognize',n:1,emoji:'👀',name:'入门识别',desc:'发音字母 · 问候自我介绍',cards:[130,131]},
+  {id:'vocab',n:2,emoji:'🔤',name:'基础词汇',desc:'数字时间 · 人物 · 物品冠词',cards:[132,133,134]},
+  {id:'pattern',n:3,emoji:'🧩',name:'基础句型',desc:'规则动词 · 高频句型',cards:[135,137]},
+  {id:'listen',n:4,emoji:'🎧',name:'听力入门',desc:'听关键词，对应意思',quiz:'listen'},
+  {id:'speak',n:5,emoji:'🗣️',name:'口语入门',desc:'跟读礼貌表达 · 录音回放',card:136},
+  {id:'task',n:6,emoji:'🎯',name:'旅行任务',desc:'问路 · 点餐 · 求助情景闯关',quiz:'task'}
+ ];
+ const baseQs=()=>QUESTIONS.filter(q=>q.theme===13);
+ const baseLearned=()=>{const d=getData();return BASE_IDS.filter(id=>d.learned&&d.learned[id]).length;};
+ function renderRoute(){
+  const learned=baseLearned(),pct=Math.round(learned/BASE_IDS.length*100);
+  document.getElementById('v8Route').innerHTML=ROUTE.map(r=>{
+   if(r.open){
+    const states=`<span class="vr-state open">🟢 已开放</span>`
+      +(pct>=100?`<span class="vr-state done">🏆 已完成</span>`:(pct>0?`<span class="vr-state cur">⭐ 进行中</span>`:''));
+    return `<button class="vr-node open" onclick="openBase()">`
+      +`<span class="vr-emoji">🌱</span>`
+      +`<span class="vr-body"><span class="vr-name">${r.name} ${states}</span>`
+      +`<span class="vr-desc">${r.desc}</span>`
+      +`<span class="vr-bar"><span style="width:${pct}%"></span></span>`
+      +`<span class="vr-pct">${learned}/${BASE_IDS.length} 张卡 · ${pct}%</span></span>`
+      +`<span class="vr-arrow">›</span></button>`;
+   }
+   return `<button class="vr-node locked" onclick="openLock('${r.name}')">`
+    +`<span class="vr-emoji">${r.emoji}</span>`
+    +`<span class="vr-body"><span class="vr-name">${r.name} <span class="vr-state lock">🔒 升级中</span></span>`
+    +`<span class="vr-desc">${r.desc}</span></span>`
+    +`<span class="vr-arrow">🔒</span></button>`;
+  }).join('');
+ }
+ function mindmapHTML(){
+  const d=getData(),qs=baseQs(),learned=baseLearned();
+  const listen=qs.filter(q=>q.kind==='listen');
+  const listenDone=listen.filter(q=>d.done&&d.done[q.id]).length;
+  const steps=[
+   {name:'认识',done:learned>=1,hint:'看到词，能认出'},
+   {name:'听懂',done:listenDone>=Math.min(2,listen.length),hint:'听发音，对应意思'},
+   {name:'理解',done:learned>=3,hint:'懂句型与用法'},
+   {name:'会说',done:learned>=5,hint:'跟读并开口'},
+   {name:'会用',done:learned>=8,hint:'在任务里用出来'}
+  ];
+  const first=steps.findIndex(s=>!s.done);
+  let out='';
+  steps.forEach((s,i)=>{
+   const cls=s.done?'done':(i===first?'cur':''),mk=s.done?'✓':(i===first?'●':'○');
+   out+=`<div class="mm-step ${cls}"><span class="mm-mark">${mk}</span><span class="mm-name">${i+1} ${s.name}</span><span class="mm-hint">${s.hint}</span></div>`;
+   if(i<steps.length-1)out+=`<div class="mm-line ${s.done?'on':''}"></div>`;
+  });
+  return out;
+ }
+ function renderBase(){
+  document.getElementById('v8Mindmap').innerHTML=mindmapHTML();
+  document.getElementById('v8BaseGrid').innerHTML=MODULES.map(m=>{
+   let action;
+   if(m.cards)action=`showBaseLessons('${m.id}')`;
+   else if(m.quiz)action=`startBaseQuiz('${m.quiz}')`;
+   else if(m.card!==undefined)action=`openBaseCard(${m.card})`;
+   return `<button class="bm-card" onclick="${action}">`
+    +`<span class="bm-num">${m.n}</span><span class="bm-emoji">${m.emoji}</span>`
+    +`<span class="bm-body"><span class="bm-name">${m.name}</span><span class="bm-desc">${m.desc}</span></span>`
+    +`<span class="bm-go">›</span></button>`;
+  }).join('');
+  document.getElementById('v8BaseLessons').innerHTML='';
+ }
+ function showBaseLessons(mid){
+  const m=MODULES.find(x=>x.id===mid),d=getData();
+  document.getElementById('v8BaseLessons').innerHTML=
+   `<div class="v8-lesson-wrap">`
+   +`<div class="v8-lesson-head"><button class="v8-back" onclick="closeBaseLessons()">← 返回旅行基础</button><h3>${m.emoji} ${m.name}</h3></div>`
+   +`<div class="v8-lesson-list">`+m.cards.map((id,i)=>{
+     const c=CARDS.find(x=>x.id===id),ok=d.learned&&d.learned[id];
+     return `<button class="v8-lesson-item ${ok?'done':''}" onclick="openBaseCard(${id})">`
+      +`<span class="v8-li-num">${ok?'🌟':i+1}</span>`
+      +`<span class="v8-li-main"><span class="v8-li-name">${c.name}</span>`
+      +`<span class="v8-li-meta"><span class="lv-pill lv-${c.lv}">${c.lv}</span><span>${c.v.length}词 · ${c.p.length}句</span></span></span>`
+      +`<span class="v8-li-go">›</span></button>`;
+   }).join('')+`</div></div>`;
+ }
+ function closeBaseLessons(){document.getElementById('v8BaseLessons').innerHTML='';}
+ function openBaseCard(id){
+  openCard(id);
+  const b=document.getElementById('cardBackBtn');
+  if(b)b.onclick=openBase;
+ }
+ function startBaseQuiz(type){
+  let qs=baseQs();
+  if(type==='listen')qs=qs.filter(q=>q.kind==='listen').slice(0,20);
+  else if(type==='task')qs=shuffle(qs.filter(q=>['situation','order','listen','judge'].includes(q.kind))).slice(0,24);
+  if(!qs.length){showToast('🥚 题目还在生成，先学上面的卡片吧～');return;}
+  state.qs=shuffle(qs);state.mode='base';startQuiz();
+ }
+ function openLock(name){
+  document.getElementById('v8LockTitle').innerHTML=`「${name}」路线<br>正在升级中`;
+  showPage('lockPage');
+ }
+ function openBase(){renderBase();showPage('basePage');}
+ function v8OpenFull(){
+  initHome();showPage('homePage');
+  let bar=document.getElementById('v8ToMap');
+  if(!bar){bar=document.createElement('div');bar.id='v8ToMap';bar.className='v8-to-map';
+   bar.innerHTML='<button class="v8-back" onclick="goHome()">← 返回旅行地图</button>';
+   const c=document.querySelector('#homePage .container');if(c)c.insertBefore(bar,c.firstChild);}
+ }
+ // 让所有“回到首页/首次进入”落点变为旅行地图
+ const _origInit=window.initHome;
+ window.initHome=function(){_origInit();try{renderRoute();}catch(e){}showPage('mapPage');};
+ Object.assign(window,{openBase,openLock,showBaseLessons,closeBaseLessons,openBaseCard,
+  startBaseQuiz,startBaseChallenge:()=>startBaseQuiz('task'),v8OpenFull,renderRoute});
+})();
 </script>
 </body>
 </html>
